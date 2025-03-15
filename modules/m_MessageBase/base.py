@@ -1,4 +1,7 @@
+import io
+import mimetypes
 import requests
+import filetype
 
 
 class MessageBase:
@@ -16,9 +19,18 @@ class MessageBase:
             url=url, headers={"Content-Type": "application/json"}, json=data
         ).json()
 
-    def NetFileUpload(self, url, name, file: bytes) -> dict[str, any]:
+    def NetFileUpload(self, url, field_name, file_bytes) -> dict[str, any]:
+        file_name = "file.{}".format(filetype.guess(file_bytes).extension)
         return requests.post(
             url=url,
-            headers={"Content-Type": "multipart/form-data"},
-            files=[(name, file)],
+            files=[
+                (
+                    field_name,
+                    (
+                        file_name,
+                        io.BufferedReader(io.BytesIO(file_bytes)),
+                        mimetypes.guess_type(file_name),
+                    ),
+                )
+            ],
         ).json()
