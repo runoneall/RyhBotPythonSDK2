@@ -5,6 +5,12 @@ from . import sdk
 from . import util
 from . import errors
 
+if os.path.exists("./env.py"):
+    import env
+    env_vars = [x for x in dir(env) if x.startswith("env_")]
+    for item in env_vars:
+        os.environ[item] = getattr(env, item)
+
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
 sys.path.append(sdkModulePath)
 sdkInstalledModules: list[str] = [
