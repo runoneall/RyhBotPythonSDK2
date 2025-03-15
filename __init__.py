@@ -7,7 +7,7 @@ from . import errors
 
 if os.path.exists("./env.py"):
     import env
-    env_vars = [x for x in dir(env) if x.startswith("env_")]
+    env_vars = [e for e in dir(env) if e.startswith("env_")]
     for item in env_vars:
         os.environ[item] = getattr(env, item)
 
