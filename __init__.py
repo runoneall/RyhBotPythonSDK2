@@ -34,6 +34,8 @@ sdkInstalledModules: list[object] = [
 for module in sdkInstalledModules:
     modulePackage: str = module.__package__
     moduleInfo: dict = module.moduleInfo
+    if moduleInfo["name"] in dir(sdk):
+        raise errors.InvalidModuleError(f"Module {modulePackage} has duplicate name")
     if "Main" not in dir(module):
         raise errors.InvalidModuleError(f"Module {modulePackage} has no Main class")
     moduleMain: object = module.Main(sdk)
