@@ -134,5 +134,29 @@ class SendMessage:
             ),
         )
 
-    def File(self):
-        pass
+    def File(
+        self,
+        recvId: str,
+        recvType: str,
+        content: bytes,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "file",
+                {
+                    "fileKey": self.NetFileUpload(
+                        "https://chat-go.jwzhd.com/open-apis/v1/file/upload?token="
+                        + self.yhToken,
+                        "file",
+                        content,
+                    )["data"]["fileKey"],
+                    "buttons": buttons,
+                },
+                parentId,
+            ),
+        )
