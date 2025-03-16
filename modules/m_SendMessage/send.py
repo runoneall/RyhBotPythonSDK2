@@ -1,8 +1,8 @@
 class SendMessage:
     def __init__(self, sdk):
+        self.yhToken = sdk.MessageBase.yhToken
         self.apiUrl = (
-            "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token="
-            + sdk.MessageBase.yhToken
+            "https://chat-go.jwzhd.com/open-apis/v1/bot/send?token=" + self.yhToken
         )
         self.NetJsonPost = sdk.MessageBase.NetJsonPost
         self.NetFileUpload = sdk.MessageBase.NetFileUpload
@@ -42,17 +42,97 @@ class SendMessage:
             ),
         )
 
-    def Markdown(self):
-        pass
+    def Markdown(
+        self,
+        recvId: str,
+        recvType: str,
+        content: str,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "markdown",
+                {"text": content, "buttons": buttons},
+                parentId,
+            ),
+        )
 
-    def Html(self):
-        pass
+    def Html(
+        self,
+        recvId: str,
+        recvType: str,
+        content: str,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "html",
+                {"text": content, "buttons": buttons},
+                parentId,
+            ),
+        )
 
-    def Image(self):
-        pass
+    def Image(
+        self,
+        recvId: str,
+        recvType: str,
+        content: bytes,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "image",
+                {
+                    "imageKey": self.NetFileUpload(
+                        "https://chat-go.jwzhd.com/open-apis/v1/image/upload?token="
+                        + self.yhToken,
+                        "image",
+                        content,
+                    )["data"]["imageKey"],
+                    "buttons": buttons,
+                },
+                parentId,
+            ),
+        )
 
-    def Video(self):
-        pass
+    def Video(
+        self,
+        recvId: str,
+        recvType: str,
+        content: bytes,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "video",
+                {
+                    "videoKey": self.NetFileUpload(
+                        "https://chat-go.jwzhd.com/open-apis/v1/video/upload?token="
+                        + self.yhToken,
+                        "video",
+                        content,
+                    )["data"]["videoKey"],
+                    "buttons": buttons,
+                },
+                parentId,
+            ),
+        )
 
     def File(self):
         pass
