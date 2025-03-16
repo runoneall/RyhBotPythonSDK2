@@ -1,4 +1,3 @@
-import os
 import io
 import mimetypes
 import requests
@@ -7,7 +6,7 @@ import filetype
 
 class MessageBase:
     def __init__(self, sdk) -> None:
-        self.yhToken = os.environ.get("env_YUNHU_TOKEN")
+        self.yhToken = sdk.env.YUNHU_TOKEN
 
     def NetGet(self, url) -> dict[str, any]:
         return requests.get(url=url).json()
