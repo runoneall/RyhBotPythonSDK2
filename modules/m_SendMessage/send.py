@@ -22,3 +22,37 @@ class SendMessage:
             "content": content,
             "parentId": parentId,
         }
+
+    def Text(
+        self,
+        recvId: str,
+        recvType: str,
+        content: str,
+        buttons: list[list[dict[str, any]]] = [],
+        parentId: str = "",
+    ) -> dict[str, any]:
+        return self.NetJsonPost(
+            self.apiUrl,
+            self._gen_body(
+                recvId,
+                recvType,
+                "text",
+                {"text": content, "buttons": buttons},
+                parentId,
+            ),
+        )
+
+    def Markdown(self):
+        pass
+
+    def Html(self):
+        pass
+
+    def Image(self):
+        pass
+
+    def Video(self):
+        pass
+
+    def File(self):
+        pass

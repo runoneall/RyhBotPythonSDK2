@@ -6,6 +6,7 @@ from . import util
 from . import errors
 
 if os.path.exists("./env.py"):
+    print("Load env")
     setattr(sdk, "env", __import__("env"))
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
