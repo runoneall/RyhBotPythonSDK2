@@ -8,7 +8,7 @@ class MessageBase:
     def __init__(self, sdk) -> None:
         self.yhToken = sdk.env.YUNHU_TOKEN
 
-    def NetGet(self, url) -> dict[str, any]:
+    def NetJsonGet(self, url) -> dict[str, any]:
         return requests.get(url=url).json()
 
     def NetJsonPost(self, url, data) -> dict[str, any]:
