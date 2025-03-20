@@ -26,8 +26,10 @@ class Message:
             api += f"&message-id={msgId}"
         return self.NetJsonGet(api)
 
-    # 获取群ID【xxx】中消息 ID【xxxx】后 10 条消息，共返回 11 条消息
-    # https://chat-go.jwzhd.com/open-apis/v1/bot/messages?token=xxxxx&chat-id=xxx&chat-type=group&message-id=xxxx&after=10
-
-    # 获取群ID【xxx】中消息 ID【xxxx】前后各 10 条消息，共返回 21 条消息
-    # https://chat-go.jwzhd.com/open-apis/v1/bot/messages?token=xxxxx&chat-id=xxx&chat-type=group&message-id=xxxx&before=10&after=10
+    def HistoryAfter(
+        self, chatId: str, chatType: str, msgId: str, after: int, before: int = None
+    ) -> dict[str, any]:
+        api = f"{self.history_api}&chat-id={chatId}&chat-type={chatType}&message-id={msgId}&after={after}"
+        if before is not None:
+            api += f"&before={before}"
+        return self.NetJsonGet(api)
