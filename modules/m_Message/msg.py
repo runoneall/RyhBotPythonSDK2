@@ -3,16 +3,13 @@ class Message:
         self.yhToken = sdk.MessageBase.yhToken
         self.NetJsonPost = sdk.MessageBase.NetJsonPost
         self.NetJsonGet = sdk.MessageBase.NetJsonGet
-        self.recall_api = (
-            "https://chat-go.jwzhd.com/open-apis/v1/bot/recall?token=" + self.yhToken
-        )
         self.history_api = (
             "https://chat-go.jwzhd.com/open-apis/v1/bot/messages?token=" + self.yhToken
         )
 
     def Recall(self, msgId: str, recvId: str, recvType: str) -> dict[str, any]:
         return self.NetJsonPost(
-            self.recall_api,
+            "https://chat-go.jwzhd.com/open-apis/v1/bot/recall?token=" + self.yhToken,
             {"msgId": msgId, "chatId": recvId, "chatType": recvType},
         )
 
