@@ -21,6 +21,8 @@ class Server:
         def Handle():
             data = flask.request.json
             t_name = data["header"]["eventType"]
+            if t_name not in self.triggers:
+                return "IGNORE"
             for h in self.triggers[t_name]:
                 h.OnRecv(data)
             return "OK"
