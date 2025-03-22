@@ -7,9 +7,6 @@ class Server:
         self.serv = sdk.env.SERVER
         self.app = flask.Flask(__name__)
 
-    def ShowTriggers(self) -> dict[str, list[object]]:
-        return self.triggers
-
     def AddTrigger(self, trigger: object):
         t_name = trigger.on
         if t_name not in self.triggers:
