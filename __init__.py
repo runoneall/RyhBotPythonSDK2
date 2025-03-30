@@ -4,12 +4,14 @@ import sys
 from . import sdk
 from . import util
 from . import errors
+from . import logger
 
 if os.path.exists("./env.py"):
     print("Load env")
     setattr(sdk, "env", __import__("env"))
 print("Load util")
 setattr(sdk, "util", util)
+setattr(sdk, "logger", logger.logger)
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
 sys.path.append(sdkModulePath)
