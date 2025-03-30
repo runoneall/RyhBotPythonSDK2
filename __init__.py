@@ -8,6 +8,8 @@ from . import errors
 if os.path.exists("./env.py"):
     print("Load env")
     setattr(sdk, "env", __import__("env"))
+print("Load util")
+setattr(sdk, "util", util)
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
 sys.path.append(sdkModulePath)
@@ -27,7 +29,7 @@ for module in sdkInstalledModules:
     sdkModuleDependencies[module] = moduleDependecies
 sdkInstalledModules: list[object] = [
     __import__(m)
-    for m in util.topological_sort(
+    for m in sdk.util.topological_sort(
         sdkInstalledModules, sdkModuleDependencies, errors.CycleDependencyError
     )
 ]
