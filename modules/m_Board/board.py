@@ -1,5 +1,5 @@
 class Board:
-    def __init__(self, sdk):
+    def __init__(self, sdk, logger):
         self.yhToken = sdk.MessageBase.yhToken
         self.NetJsonPost = sdk.MessageBase.NetJsonPost
         self.local_board_api = (

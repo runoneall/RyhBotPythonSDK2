@@ -5,7 +5,7 @@ import filetype
 
 
 class MessageBase:
-    def __init__(self, sdk) -> None:
+    def __init__(self, sdk, logger) -> None:
         self.yhToken = sdk.env.YUNHU_TOKEN
 
     def NetJsonGet(self, url) -> dict[str, any]:

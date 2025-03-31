@@ -2,15 +2,16 @@ import logging
 
 
 class Logger:
-    def __init__(self):
+    def __init__(self, quoter: str):
+        self.quoter = quoter
         self._init_logger()
 
     def _init_logger(self):
-        self.logger = logging.getLogger("RyhBot")
+        self.logger = logging.getLogger(self.quoter)
         self.logger.setLevel(logging.DEBUG)
 
         if not self.logger.handlers:
-            log_format = f"[%(asctime)s] " f"[%(levelname)s] " f"%(message)s"
+            log_format = f"[%(levelname)s] {self.quoter}: %(message)s"
             color_map = {
                 "DEBUG": "\033[94m",
                 "INFO": "\033[92m",
@@ -64,6 +65,3 @@ class Logger:
             )
         else:
             self.logger.error(msg, **kwargs)
-
-
-logger = Logger()

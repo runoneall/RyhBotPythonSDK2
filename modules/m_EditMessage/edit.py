@@ -1,5 +1,5 @@
 class EditMessage:
-    def __init__(self, sdk):
+    def __init__(self, sdk, logger):
         self.yhToken = sdk.MessageBase.yhToken
         self.apiUrl = (
             "https://chat-go.jwzhd.com/open-apis/v1/bot/edit?token=" + self.yhToken
