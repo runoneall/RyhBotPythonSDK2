@@ -97,14 +97,19 @@ if __name__ == "__main__":
         origins = moduleObj["origins"]
         moduleObj["providers"] = {}
         moduleObj["modules"] = {}
+        moduleObj["moduleAlias"] = {}
         for origin in origins:
             print(f"Fetch {origin}")
             content = requests.get(origin).json()
             moduleObj["providers"][content["name"]] = content["base"]
             for module in list(content["modules"].keys()):
-                moduleObj["modules"][f'{module}@{content["name"]}'] = content[
-                    "modules"
-                ][module]
+                moduleContent = content["modules"][module]
+                moduleObj["modules"][f'{module}@{content["name"]}'] = moduleContent
+                moduleOriginName = moduleContent["path"][1:-4]
+                moduleAliasName = module
+                moduleObj["moduleAlias"][
+                    f'{moduleOriginName}@{content["name"]}'
+                ] = moduleAliasName
         writeModuleFile(moduleObj)
 
     CmdArg.Bind("-update-origin", updateOrigin)
