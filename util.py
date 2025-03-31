@@ -37,10 +37,15 @@ class CmdArg:
         self.cmdArgs: list[str] = sys.argv[1:]
         self.bindArgs: list[str] = []
         self.bindArgObjs: dict[str, object] = {}
+        self.error = ""
+        self.errorFlag = True
 
     def Bind(self, argName: str, argObj: object):
         self.bindArgs.append(argName)
         self.bindArgObjs[argName] = argObj
+
+    def OnError(self, error):
+        self.error = error
 
     def Execute(self):
         for i in range(len(self.cmdArgs)):
@@ -55,3 +60,7 @@ class CmdArg:
             else:
                 value = self.cmdArgs[i + 1]
             self.bindArgObjs[arg](value)
+            self.errorFlag = False
+        if self.errorFlag:
+            print(self.error)
+            exit(1)

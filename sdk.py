@@ -66,4 +66,32 @@ if __name__ == "__main__":
 
     CmdArg.Bind("-del-env", delEnv)
 
+    def checkModuleFile():
+        if not os.path.exists("./module.json"):
+            with open("./module.json", "w") as f:
+                f.write('{\n    "origins": []\n}')
+
+    def getModuleFile():
+        with open("./module.json", "r") as f:
+            return json.load(f)
+
+    def writeModuleFile(moduleObj):
+        with open("./module.json", "w") as f:
+            json.dump(moduleObj, f, indent=2)
+
+    def addOrigin(value):
+        checkModuleFile()
+        moduleObj = getModuleFile()
+        if value not in moduleObj["origins"]:
+            moduleObj["origins"].append(value)
+            writeModuleFile(moduleObj)
+
+    CmdArg.Bind("-add-origin", addOrigin)
+
+    def updateOrigin(value):
+        checkModuleFile()
+
+    CmdArg.Bind("-update-origin", updateOrigin)
+
+    CmdArg.OnError("Invalid command.")
     CmdArg.Execute()
