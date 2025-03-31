@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     CmdArg.Bind("-del-env", delEnv)
 
-    # For Module
+    # For Origins
     def checkModuleFile():
         if not os.path.exists("./module.json"):
             with open("./module.json", "w") as f:
@@ -111,6 +111,7 @@ if __name__ == "__main__":
                     f'{moduleOriginName}@{content["name"]}'
                 ] = moduleAliasName
         writeModuleFile(moduleObj)
+        print("done")
 
     CmdArg.Bind("-update-origin", updateOrigin)
 
