@@ -1,14 +1,22 @@
 import os
 import sys
+import json
+from types import SimpleNamespace
 
 from . import sdk
 from . import util
 from . import errors
 from . import logger
 
-if os.path.exists("./env.py"):
+if os.path.exists("./env.json"):
     print("Load env")
-    setattr(sdk, "env", __import__("env"))
+    with open("./env.json") as f:
+        envJson = json.load(f)
+    env = SimpleNamespace()
+    for key, value in envJson.items():
+        setattr(env, key, value)
+    setattr(sdk, "env", env)
+
 print("Load util")
 setattr(sdk, "util", util)
 setattr(sdk, "logger", logger.Logger("SDK"))

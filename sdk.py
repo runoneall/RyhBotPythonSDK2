@@ -1,2 +1,5 @@
 if __name__ == "__main__":
-    print("sdk cli")
+
+    import os
+
+    sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
