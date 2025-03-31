@@ -3,10 +3,12 @@ if __name__ == "__main__":
     import os
     import util
     import json
+    import requests
 
     sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
     CmdArg = util.CmdArg()
 
+    # For Env
     def checkEnvFile():
         if not os.path.exists("./env.json"):
             with open("./env.json", "w") as f:
@@ -66,6 +68,7 @@ if __name__ == "__main__":
 
     CmdArg.Bind("-del-env", delEnv)
 
+    # For Module
     def checkModuleFile():
         if not os.path.exists("./module.json"):
             with open("./module.json", "w") as f:
@@ -77,7 +80,7 @@ if __name__ == "__main__":
 
     def writeModuleFile(moduleObj):
         with open("./module.json", "w") as f:
-            json.dump(moduleObj, f, indent=2)
+            json.dump(moduleObj, f, indent=2, ensure_ascii=False)
 
     def addOrigin(value):
         checkModuleFile()
@@ -90,6 +93,19 @@ if __name__ == "__main__":
 
     def updateOrigin(value):
         checkModuleFile()
+        moduleObj = getModuleFile()
+        origins = moduleObj["origins"]
+        moduleObj["providers"] = {}
+        moduleObj["modules"] = {}
+        for origin in origins:
+            print(f"Fetch {origin}")
+            content = requests.get(origin).json()
+            moduleObj["providers"][content["name"]] = content["base"]
+            for module in list(content["modules"].keys()):
+                moduleObj["modules"][f'{module}@{content["name"]}'] = content[
+                    "modules"
+                ][module]
+        writeModuleFile(moduleObj)
 
     CmdArg.Bind("-update-origin", updateOrigin)
 
