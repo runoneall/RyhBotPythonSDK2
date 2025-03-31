@@ -11,7 +11,6 @@ class Logger:
         self.logger.setLevel(logging.DEBUG)
 
         if not self.logger.handlers:
-            log_format = f"[%(levelname)s] {self.quoter}: %(message)s"
             color_map = {
                 "DEBUG": "\033[94m",
                 "INFO": "\033[92m",
@@ -19,6 +18,7 @@ class Logger:
                 "ERROR": "\033[91m",
                 "RESET": "\033[0m",
             }
+            log_format = f"[%(levelname)s] [{color_map['WARNING']}{self.quoter}{color_map['RESET']}] %(message)s"
 
             class ColoredFormatter(logging.Formatter):
                 def format(self, record):
