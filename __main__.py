@@ -295,6 +295,26 @@ def installModule(value):
     print("Extracting...")
     shutil.unpack_archive(os.path.join(targetPath, "module.zip"), targetPath)
     os.remove(os.path.join(targetPath, "module.zip"))
+    targetModuleName = [
+        x for x in os.listdir(targetPath) if os.path.isdir(os.path.join(targetPath, x))
+    ][0]
+    if not targetModuleName.startswith("m_"):
+        os.rename(
+            os.path.join(targetPath, targetModuleName),
+            os.path.join(targetPath, "m_" + targetModuleName),
+        )
+    targetModuleName = "m_" + targetModuleName
+    if os.path.exists(os.path.join(sdkModulePath, targetModuleName)):
+        if input(f"\n{targetModuleName} already installed. Overwrite? (y/n) ") == "y":
+            shutil.rmtree(os.path.join(sdkModulePath, targetModuleName))
+            shutil.move(
+                os.path.join(targetPath, targetModuleName),
+                os.path.join(sdkModulePath, targetModuleName),
+            )
+            print(f"Module {targetModuleName} installed.")
+        else:
+            print("Abort.")
+    shutil.rmtree(targetPath)
 
 
 CmdArg.Bind("-install-module", installModule)
