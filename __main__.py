@@ -1,10 +1,12 @@
 import os
 import json
+import sys
 import requests
 
 from . import util
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
+sys.path.append(sdkModulePath)
 
 CmdArg = util.CmdArg()
 
@@ -153,6 +155,74 @@ def delOrigin(value):
 
 
 CmdArg.Bind("-del-origin", delOrigin)
+
+
+# For Module
+def checkModuleDir():
+    if not os.path.exists(sdkModulePath):
+        os.makedirs(sdkModulePath)
+
+
+def checkModuleExist(module):
+    checkModuleDir()
+    return os.path.exists(os.path.join(sdkModulePath, module))
+
+
+def listModule(value):
+    checkModuleDir()
+    sdkInstalledModules: list[str] = [
+        os.path.basename(x)
+        for x in os.listdir(sdkModulePath)
+        if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
+    ]
+    for module in sdkInstalledModules:
+        print(module)
+
+
+CmdArg.Bind("-list-module", listModule)
+
+
+def moduleInfo(value):
+    if not checkModuleExist(value):
+        print(f"Module {value} not found.")
+        exit(1)
+    moduleInfo = __import__(value).moduleInfo
+    print(f"NameSpace: sdk.{moduleInfo['name']}")
+    print(f"Author: {moduleInfo['author']}")
+    print(f"Version: {moduleInfo['version']}")
+    print(f"\n  {moduleInfo['description']}\n")
+    print(f"Dependencies: {', '.join(moduleInfo['dependencies'])}")
+
+
+CmdArg.Bind("-module-info", moduleInfo)
+
+
+def enableModule(value):
+    checkModuleDir()
+    if os.path.exists(os.path.join(sdkModulePath, value)):
+        print(f"Module {value} already enabled.")
+        return
+    os.rename(
+        os.path.join(sdkModulePath, f"d{value}"), os.path.join(sdkModulePath, value)
+    )
+    print(f"Module {value} enabled.")
+
+
+CmdArg.Bind("-enable-module", enableModule)
+
+
+def disableModule(value):
+    checkModuleDir()
+    if os.path.exists(os.path.join(sdkModulePath, f"d{value}")):
+        print(f"Module {value} already disabled.")
+        return
+    os.rename(
+        os.path.join(sdkModulePath, value), os.path.join(sdkModulePath, f"d{value}")
+    )
+    print(f"Module {value} disabled.")
+
+
+CmdArg.Bind("-disable-module", disableModule)
 
 
 CmdArg.OnError("Invalid command.")
