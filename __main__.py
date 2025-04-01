@@ -163,6 +163,12 @@ def checkModuleExist(module):
     return os.path.exists(os.path.join(sdkModulePath, module))
 
 
+def checkInstallDir(targetPath):
+    if os.path.exists(targetPath):
+        shutil.rmtree(targetPath)
+    os.mkdir(targetPath)
+
+
 def listModule(value):
     checkModuleDir()
     sdkInstalledModules: list[str] = [
@@ -272,11 +278,23 @@ def installModule(value):
         print("Please input target module name.")
         exit(1)
     print(f"\nInstalling {targetModule}...")
+    targetPath = os.path.join(sdkModulePath, "INSTALL")
+    checkInstallDir(targetPath)
     moduleUrl = (
         moduleObj["providers"][targetModule.split("@")[1]]
         + moduleObj["modules"][targetModule]["path"]
     )
     print(f"Fetch {moduleUrl}...")
+    response = requests.get(
+        moduleUrl, headers={"User-Agent": "SDK Frame CLI"}, stream=True
+    )
+    with open(os.path.join(targetPath, "module.zip"), "wb") as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+    print("Extracting...")
+    shutil.unpack_archive(os.path.join(targetPath, "module.zip"), targetPath)
+    os.remove(os.path.join(targetPath, "module.zip"))
 
 
 CmdArg.Bind("-install-module", installModule)
