@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import shutil
 import requests
 
 from . import util
@@ -224,6 +225,16 @@ def disableModule(value):
 
 CmdArg.Bind("-disable-module", disableModule)
 
+
+def delModule(value):
+    if not checkModuleExist(value):
+        print(f"Module {value} already deleted.")
+        return
+    shutil.rmtree(os.path.join(sdkModulePath, value))
+    print(f"Module {value} deleted.")
+
+
+CmdArg.Bind("-del-module", delModule)
 
 CmdArg.OnError("Invalid command.")
 CmdArg.Execute()
