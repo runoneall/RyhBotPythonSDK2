@@ -5,6 +5,8 @@ import requests
 from . import util
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
+print(os.listdir(sdkModulePath))
+
 CmdArg = util.CmdArg()
 
 

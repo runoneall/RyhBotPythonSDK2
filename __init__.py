@@ -4,12 +4,12 @@ def init():
     import sys
     import json
 
-    from . import sdk
     from . import util
     from . import errors
     from . import logger
 
     SimpleNamespace = type(sys.implementation)
+    sdk = SimpleNamespace()
 
     if os.path.exists("./env.json"):
         print("Load env")
