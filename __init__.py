@@ -1,12 +1,13 @@
 import os
 import sys
 import json
-from types import SimpleNamespace
 
 from . import sdk
 from . import util
 from . import errors
 from . import logger
+
+SimpleNamespace = type(sys.implementation)
 
 if os.path.exists("./env.json"):
     print("Load env")
