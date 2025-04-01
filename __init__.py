@@ -1,60 +1,65 @@
-import os
-import sys
-import json
+def init():
 
-from . import sdk
-from . import util
-from . import errors
-from . import logger
+    import os
+    import sys
+    import json
 
-SimpleNamespace = type(sys.implementation)
+    from . import sdk
+    from . import util
+    from . import errors
+    from . import logger
 
-if os.path.exists("./env.json"):
-    print("Load env")
-    with open("./env.json") as f:
-        envJson = json.load(f)
-    env = SimpleNamespace()
-    for key, value in envJson.items():
-        setattr(env, key, value)
-    setattr(sdk, "env", env)
+    SimpleNamespace = type(sys.implementation)
 
-print("Load util")
-setattr(sdk, "util", util)
-setattr(sdk, "logger", logger.Logger("SDK"))
+    if os.path.exists("./env.json"):
+        print("Load env")
+        with open("./env.json") as f:
+            envJson = json.load(f)
+        env = SimpleNamespace()
+        for key, value in envJson.items():
+            setattr(env, key, value)
+        setattr(sdk, "env", env)
 
-sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
-sys.path.append(sdkModulePath)
-sdkInstalledModules: list[str] = [
-    os.path.basename(x)
-    for x in os.listdir(sdkModulePath)
-    if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
-]
+    print("Load util")
+    setattr(sdk, "util", util)
+    setattr(sdk, "logger", logger.Logger("SDK"))
 
-sdk.logger.info("Scan Dependencies")
-sdkModuleDependencies = {}
-for module in sdkInstalledModules:
-    moduleDependecies: list[str] = __import__(module).moduleInfo["dependencies"]
-    if not all(dep in sdkInstalledModules for dep in moduleDependecies):
-        raise errors.InvalidDependencyError(
-            f"Invalid module dependency for module {module}: {moduleDependecies}"
+    sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
+    sys.path.append(sdkModulePath)
+    sdkInstalledModules: list[str] = [
+        os.path.basename(x)
+        for x in os.listdir(sdkModulePath)
+        if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
+    ]
+
+    sdk.logger.info("Scan Dependencies")
+    sdkModuleDependencies = {}
+    for module in sdkInstalledModules:
+        moduleDependecies: list[str] = __import__(module).moduleInfo["dependencies"]
+        if not all(dep in sdkInstalledModules for dep in moduleDependecies):
+            raise errors.InvalidDependencyError(
+                f"Invalid module dependency for module {module}: {moduleDependecies}"
+            )
+        sdkModuleDependencies[module] = moduleDependecies
+    sdkInstalledModules: list[object] = [
+        __import__(m)
+        for m in sdk.util.topological_sort(
+            sdkInstalledModules, sdkModuleDependencies, errors.CycleDependencyError
         )
-    sdkModuleDependencies[module] = moduleDependecies
-sdkInstalledModules: list[object] = [
-    __import__(m)
-    for m in sdk.util.topological_sort(
-        sdkInstalledModules, sdkModuleDependencies, errors.CycleDependencyError
-    )
-]
+    ]
 
-for module in sdkInstalledModules:
-    modulePackage: str = module.__package__
-    moduleInfo: dict = module.moduleInfo
-    sdk.logger.info("Load {} -> {}".format(modulePackage, moduleInfo["name"]))
-    if moduleInfo["name"] in dir(sdk):
-        raise errors.InvalidModuleError(f"Module {modulePackage} has duplicate name")
-    if "Main" not in dir(module):
-        raise errors.InvalidModuleError(f"Module {modulePackage} has no Main class")
-    moduleLogger = logger.Logger(moduleInfo["name"])
-    moduleMain: object = module.Main(sdk, moduleLogger)
-    setattr(moduleMain, "moduleInfo", moduleInfo)
-    setattr(sdk, moduleInfo["name"], moduleMain)
+    for module in sdkInstalledModules:
+        modulePackage: str = module.__package__
+        moduleInfo: dict = module.moduleInfo
+        sdk.logger.info("Load {} -> {}".format(modulePackage, moduleInfo["name"]))
+        if moduleInfo["name"] in dir(sdk):
+            raise errors.InvalidModuleError(
+                f"Module {modulePackage} has duplicate name"
+            )
+        if "Main" not in dir(module):
+            raise errors.InvalidModuleError(f"Module {modulePackage} has no Main class")
+        moduleLogger = logger.Logger(moduleInfo["name"])
+        moduleMain: object = module.Main(sdk, moduleLogger)
+        setattr(moduleMain, "moduleInfo", moduleInfo)
+        setattr(sdk, moduleInfo["name"], moduleMain)
+    return sdk
