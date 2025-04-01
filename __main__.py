@@ -238,5 +238,45 @@ def delModule(value):
 
 CmdArg.Bind("-del-module", delModule)
 
+
+def installModule(value):
+    checkModuleDir()
+    checkModuleFile()
+    if value == "":
+        print("Please input module name.")
+        exit(1)
+    moduleObj = getModuleFile()
+    moduleFind = [
+        x for x in list(moduleObj["modules"].keys()) if value.lower() in x.lower()
+    ]
+    if len(moduleFind) == 0:
+        print(f"No module match {value}.")
+        exit(1)
+    print(f"Found {len(moduleFind)} modules:\n")
+    for item in moduleFind:
+        print(f"- {item}")
+        module = moduleObj["modules"][item]
+        print(f"  Version: {module['version']}")
+        print(f"  Author: {module['author']}")
+        print(f"  {module['description']}")
+        if "dependencies" in module and len(module["dependencies"]) > 0:
+            print(f"  Dependencies: {', '.join(module['dependencies'])}")
+        if (
+            "optional_dependencies" in module
+            and len(module["optional_dependencies"]) > 0
+        ):
+            print(
+                f"  Optional Dependencies: {', '.join(module['optional_dependencies'])}"
+            )
+        print("")
+    targetModule = input("You want install: ")
+    if targetModule == "" or targetModule not in moduleFind:
+        print("Please input target module name.")
+        exit(1)
+    print(f"Installing {targetModule}...")
+
+
+CmdArg.Bind("-install-module", installModule)
+
 CmdArg.OnError("Invalid command.")
 CmdArg.Execute()
