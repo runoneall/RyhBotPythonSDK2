@@ -5,7 +5,6 @@ import requests
 from . import util
 
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
-print(os.listdir(sdkModulePath))
 
 CmdArg = util.CmdArg()
 
@@ -133,6 +132,28 @@ def updateOrigin(value):
 
 
 CmdArg.Bind("-update-origin", updateOrigin)
+
+
+def listOrigin(value):
+    checkModuleFile()
+    moduleObj = getModuleFile()
+    for origin in moduleObj["origins"]:
+        print(origin)
+
+
+CmdArg.Bind("-list-origin", listOrigin)
+
+
+def delOrigin(value):
+    checkModuleFile()
+    moduleObj = getModuleFile()
+    if value in moduleObj["origins"]:
+        moduleObj["origins"].remove(value)
+        writeModuleFile(moduleObj)
+
+
+CmdArg.Bind("-del-origin", delOrigin)
+
 
 CmdArg.OnError("Invalid command.")
 CmdArg.Execute()
