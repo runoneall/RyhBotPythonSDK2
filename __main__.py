@@ -186,7 +186,15 @@ def moduleInfo(value):
     print(f"Author: {moduleInfo['author']}")
     print(f"Version: {moduleInfo['version']}")
     print(f"\n  {moduleInfo['description']}\n")
-    print(f"Dependencies: {', '.join(moduleInfo['dependencies'])}")
+    if "dependencies" in moduleInfo and len(moduleInfo["dependencies"]) > 0:
+        print(f"Dependencies: {', '.join(moduleInfo['dependencies'])}")
+    if (
+        "optional_dependencies" in moduleInfo
+        and len(moduleInfo["optional_dependencies"]) > 0
+    ):
+        print(
+            f"Optional Dependencies: {', '.join(moduleInfo['optional_dependencies'])}"
+        )
 
 
 CmdArg.Bind("-module-info", moduleInfo)
