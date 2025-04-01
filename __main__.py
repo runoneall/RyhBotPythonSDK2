@@ -80,7 +80,7 @@ def delEnv(value):
 CmdArg.Bind("-del-env", delEnv)
 
 
-# For Origins
+# For Origin
 def checkModuleFile():
     if not os.path.exists("./module.json"):
         with open("./module.json", "w") as f:

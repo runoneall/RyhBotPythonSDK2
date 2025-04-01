@@ -60,6 +60,8 @@ def init():
             raise errors.InvalidModuleError(f"Module {modulePackage} has no Main class")
         moduleLogger = logger.Logger(moduleInfo["name"])
         moduleMain: object = module.Main(sdk, moduleLogger)
+        if hasattr(moduleMain, "install"):
+            sdk = moduleMain.install(sdk)
         setattr(moduleMain, "moduleInfo", moduleInfo)
         setattr(sdk, moduleInfo["name"], moduleMain)
     return sdk
