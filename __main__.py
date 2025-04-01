@@ -265,15 +265,18 @@ def installModule(value):
             "optional_dependencies" in module
             and len(module["optional_dependencies"]) > 0
         ):
-            print(
-                f"  Optional Dependencies: {', '.join(module['optional_dependencies'])}"
-            )
+            print(f"  Optional: {', '.join(module['optional_dependencies'])}")
         print("")
     targetModule = input("You want install: ")
     if targetModule == "" or targetModule not in moduleFind:
         print("Please input target module name.")
         exit(1)
-    print(f"Installing {targetModule}...")
+    print(f"\nInstalling {targetModule}...")
+    moduleUrl = (
+        moduleObj["providers"][targetModule.split("@")[1]]
+        + moduleObj["modules"][targetModule]["path"]
+    )
+    print(f"Fetch {moduleUrl}...")
 
 
 CmdArg.Bind("-install-module", installModule)
