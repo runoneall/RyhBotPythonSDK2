@@ -18,6 +18,15 @@ def init():
         env = SimpleNamespace()
         for key, value in envJson.items():
             setattr(env, key, value)
+
+        def envGet(key, default=None):
+            return getattr(env, key, default)
+
+        def envSet(key, value):
+            setattr(env, key, value)
+
+        setattr(env, "get", envGet)
+        setattr(env, "set", envSet)
         setattr(sdk, "env", env)
 
     print("Load util")

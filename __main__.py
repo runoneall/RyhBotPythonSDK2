@@ -261,7 +261,7 @@ def installModule(value):
     if len(moduleFind) == 0:
         print(f"No module match {value}.")
         exit(1)
-    print(f"Found {len(moduleFind)} modules:\n")
+    print(f"Found {len(moduleFind)} modules for {value}:\n")
     for item in moduleFind:
         print(f"- {item}")
         module = moduleObj["modules"][item]
@@ -345,6 +345,17 @@ def installModule(value):
         if input("Install? (y/n) ") == "y":
             for dep in targetModuleObj["dependencies"]:
                 installModule(dep)
+    if (
+        "optional_dependencies" in targetModuleObj
+        and len(targetModuleObj["optional_dependencies"]) > 0
+    ):
+        print("  Module has optional dependencies: ", end="")
+        for opt_dep in targetModuleObj["optional_dependencies"]:
+            if type(opt_dep) == str:
+                print(f"{opt_dep} ", end="")
+            if type(opt_dep) == list:
+                print(f"({' | '.join(opt_dep)}) ", end="")
+        print("\n  You can install them anytime.")
     print("Done.")
 
 
