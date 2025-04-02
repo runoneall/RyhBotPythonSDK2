@@ -592,7 +592,7 @@ def makeOrigin(value):
             os.path.join(targetPath, f"{module}.zip"),
         )
     print(f"Make map.json...")
-    origin_map = {**origin_config, **origin_modules}
+    origin_map = {**origin_config, **{"modules": origin_modules}}
     with open(os.path.join(targetPath, "map.json"), "w") as f:
         json.dump(origin_map, f, indent=2, ensure_ascii=False)
     print(f"Make origin release at {targetPath}.")
