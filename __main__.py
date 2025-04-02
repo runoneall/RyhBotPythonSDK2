@@ -333,6 +333,19 @@ def installModule(value):
     )
     print(f"Module {targetModuleName} installed.")
     shutil.rmtree(targetPath)
+    print("\nScan Dependencies...")
+    targetModuleObj = moduleObj["modules"][targetModule]
+    if "dependencies" in targetModuleObj and len(targetModuleObj["dependencies"]) > 0:
+        print(
+            "  Need {} dependencies: {}".format(
+                len(targetModuleObj["dependencies"]),
+                " ".join(targetModuleObj["dependencies"]),
+            )
+        )
+        if input("Install? (y/n) ") == "y":
+            for dep in targetModuleObj["dependencies"]:
+                installModule(dep)
+    print("Done.")
 
 
 CmdArg.Bind("-install-module", installModule)
