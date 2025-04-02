@@ -174,10 +174,13 @@ def listModule(value):
     sdkInstalledModules: list[str] = [
         os.path.basename(x)
         for x in os.listdir(sdkModulePath)
-        if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
+        if os.path.isdir(os.path.join(sdkModulePath, x))
     ]
     for module in sdkInstalledModules:
-        print(module)
+        if module.startswith("m_"):
+            print(module)
+        if module.startswith("dm_"):
+            print(module[1:], "(disabled)")
 
 
 CmdArg.Bind("-list-module", listModule)
@@ -271,7 +274,13 @@ def installModule(value):
             "optional_dependencies" in module
             and len(module["optional_dependencies"]) > 0
         ):
-            print(f"  Optional: {', '.join(module['optional_dependencies'])}")
+            print("  Optional: ", end="")
+            for opt_dep in module["optional_dependencies"]:
+                if type(opt_dep) == str:
+                    print(f"{opt_dep} ", end="")
+                if type(opt_dep) == list:
+                    print(f"({' | '.join(opt_dep)}) ", end="")
+            print("")
         print("")
     targetModule = input("You want install: ")
     if targetModule == "" or targetModule not in moduleFind:
@@ -304,16 +313,25 @@ def installModule(value):
             os.path.join(targetPath, "m_" + targetModuleName),
         )
     targetModuleName = "m_" + targetModuleName
-    if os.path.exists(os.path.join(sdkModulePath, targetModuleName)):
+    if os.path.exists(os.path.join(sdkModulePath, targetModuleName)) or os.path.exists(
+        os.path.join(sdkModulePath, "d" + targetModuleName)
+    ):
         if input(f"\n{targetModuleName} already installed. Overwrite? (y/n) ") == "y":
+            if os.path.exists(os.path.join(sdkModulePath, "d" + targetModuleName)):
+                os.rename(
+                    os.path.join(sdkModulePath, "d" + targetModuleName),
+                    os.path.join(sdkModulePath, targetModuleName),
+                )
             shutil.rmtree(os.path.join(sdkModulePath, targetModuleName))
-            shutil.move(
-                os.path.join(targetPath, targetModuleName),
-                os.path.join(sdkModulePath, targetModuleName),
-            )
-            print(f"Module {targetModuleName} installed.")
         else:
             print("Abort.")
+            shutil.rmtree(targetPath)
+            return
+    shutil.move(
+        os.path.join(targetPath, targetModuleName),
+        os.path.join(sdkModulePath, targetModuleName),
+    )
+    print(f"Module {targetModuleName} installed.")
     shutil.rmtree(targetPath)
 
 
