@@ -361,5 +361,48 @@ def installModule(value):
 
 CmdArg.Bind("-install-module", installModule)
 
+
+def loadModuleZip(value):
+    checkModuleDir()
+    if not os.path.exists(value):
+        print(f"File {value} not found.")
+        exit(1)
+    targetPath = os.path.join(sdkModulePath, "INSTALL")
+    checkInstallDir(targetPath)
+    print(f"Extracting {value}...")
+    shutil.unpack_archive(value, targetPath)
+    targetModuleName = [
+        x for x in os.listdir(targetPath) if os.path.isdir(os.path.join(targetPath, x))
+    ][0]
+    if not targetModuleName.startswith("m_"):
+        os.rename(
+            os.path.join(targetPath, targetModuleName),
+            os.path.join(targetPath, "m_" + targetModuleName),
+        )
+    targetModuleName = "m_" + targetModuleName
+    if os.path.exists(os.path.join(sdkModulePath, targetModuleName)) or os.path.exists(
+        os.path.join(sdkModulePath, "d" + targetModuleName)
+    ):
+        if input(f"\n{targetModuleName} already installed. Overwrite? (y/n) ") == "y":
+            if os.path.exists(os.path.join(sdkModulePath, "d" + targetModuleName)):
+                os.rename(
+                    os.path.join(sdkModulePath, "d" + targetModuleName),
+                    os.path.join(sdkModulePath, targetModuleName),
+                )
+            shutil.rmtree(os.path.join(sdkModulePath, targetModuleName))
+        else:
+            print("Abort.")
+            shutil.rmtree(targetPath)
+            return
+    shutil.move(
+        os.path.join(targetPath, targetModuleName),
+        os.path.join(sdkModulePath, targetModuleName),
+    )
+    print(f"Module {targetModuleName} installed.")
+    shutil.rmtree(targetPath)
+
+
+CmdArg.Bind("-load-zip", loadModuleZip)
+
 CmdArg.OnError("Invalid command.")
 CmdArg.Execute()
