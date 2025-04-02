@@ -15,12 +15,12 @@ class OpenAI:
         self.aisHistory[name] = []
         self.logger.info(f"New AI: {name}")
 
-    def Generate(self, name, moduleName, prompt, **kwargs):
+    def Generate(self, name, modelName, prompt, **kwargs):
         self.aisHistory[name].append({"role": "user", "content": prompt})
         self.logger.info(f"Generating for {name}: {prompt}")
         tokens = []
         for chunk in self.ais[name].chat.completions.create(
-            model=moduleName,
+            model=modelName,
             messages=self.aisHistory[name],
             stream=True,
             **kwargs,
