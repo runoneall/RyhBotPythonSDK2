@@ -39,6 +39,19 @@ class CmdArg:
             exit(1)
 
 
+def compare_versions(version1: str, version2: str) -> int:
+    v1 = list(map(int, version1.split(".")))
+    v2 = list(map(int, version2.split(".")))
+    for i in range(max(len(v1), len(v2))):
+        num1 = v1[i] if i < len(v1) else 0
+        num2 = v2[i] if i < len(v2) else 0
+        if num1 > num2:
+            return 1
+        elif num1 < num2:
+            return -1
+    return 0
+
+
 sdkModulePath = os.path.join(os.path.dirname(__file__), "modules")
 sys.path.append(sdkModulePath)
 CmdArg = CmdArg()
@@ -435,6 +448,122 @@ def loadModuleZip(value):
 
 
 CmdArg.Bind("-load-zip", loadModuleZip)
+
+
+def checkUpgrade(value):
+    checkModuleDir()
+    checkModuleFile()
+    updateOrigin("")
+    sdkInstalledModules: list[object] = [
+        __import__(x)
+        for x in os.listdir(sdkModulePath)
+        if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
+    ]
+    moduleObj = getModuleFile()
+    moduleDict: dict = moduleObj["modules"]
+    moduleList: list = list(moduleDict.keys())
+    upgradeList: dict = {}
+    for module in sdkInstalledModules:
+        modulePackage: str = module.__package__[2:]
+        moduleVersion: str = module.moduleInfo["version"]
+        upgradeCandidates: list = [
+            x for x in moduleList if x.split("@")[0] == modulePackage
+        ]
+        targetCandidate: str = upgradeCandidates[0]
+        if len(upgradeCandidates) > 1:
+            print(f"Module {modulePackage} has more than one provider.\n")
+            for candidate in upgradeCandidates:
+                print(f"  {candidate}")
+            targetCandidate = input("\nYou want use: ")
+            if targetCandidate not in upgradeCandidates:
+                print("Invalid input.")
+                exit(1)
+        if moduleDict[targetCandidate]["version"] != moduleVersion:
+            if (
+                compare_versions(moduleVersion, moduleDict[targetCandidate]["version"])
+                == -1
+            ):
+                upgradeList[modulePackage] = targetCandidate
+    if len(upgradeList) == 0:
+        print("All modules are up to date.")
+        return
+    print(f"Found {len(upgradeList)} modules need upgrade:\n")
+    for module, target in upgradeList.items():
+        print(f"  {target}: {moduleVersion} -> {moduleDict[target]["version"]}")
+    if input("\nUpgrade? (y/n) ") == "y":
+        targetPath = os.path.join(sdkModulePath, "INSTALL")
+        for module, target in upgradeList.items():
+            print(f"\nUpgrading {module}...")
+            checkInstallDir(targetPath)
+            moduleUrl = (
+                moduleObj["providers"][target.split("@")[1]]
+                + moduleDict[target]["path"]
+            )
+            print(f"Fetch {moduleUrl}...")
+            response = requests.get(
+                moduleUrl, headers={"User-Agent": "SDK Frame CLI"}, stream=True
+            )
+            with open(os.path.join(targetPath, "module.zip"), "wb") as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+            print("Extracting...")
+            shutil.unpack_archive(os.path.join(targetPath, "module.zip"), targetPath)
+            os.remove(os.path.join(targetPath, "module.zip"))
+            targetModuleName = [
+                x
+                for x in os.listdir(targetPath)
+                if os.path.isdir(os.path.join(targetPath, x))
+            ][0]
+            if not targetModuleName.startswith("m_"):
+                os.rename(
+                    os.path.join(targetPath, targetModuleName),
+                    os.path.join(targetPath, "m_" + targetModuleName),
+                )
+                targetModuleName = "m_" + targetModuleName
+            shutil.rmtree(os.path.join(sdkModulePath, targetModuleName))
+            shutil.move(
+                os.path.join(targetPath, targetModuleName),
+                os.path.join(sdkModulePath, targetModuleName),
+            )
+            print(f"Module {module} upgraded.")
+        shutil.rmtree(targetPath)
+        print("Done.")
+
+
+CmdArg.Bind("-check-upgrade", checkUpgrade)
+
+
+def showHelp(value):
+    print(
+        """
+SDK Frame CLI Usage:
+
+  For Env:
+    -set-env <key> [<type>:]<value>  Set environment variable. <type> can be "str", "int", "float", "bool".
+    -del-env <key>                   Delete environment variable.
+    -list-env                        List all environment variables.
+
+  For Origin:
+    -add-origin <origin>             Add origin to module.json file.
+    -update-origin                   Update origin list in module.json file.
+    -list-origin                     List all origins in module.json file.
+    -del-origin <origin>             Delete origin from module.json file.
+
+  For Module:
+    -list-module                     List all installed modules.
+    -module-info <module>            Show module information.
+    -enable-module <module>          Enable module.
+    -disable-module <module>         Disable module.
+    -del-module <module>             Delete module.
+    -install-module <module>         Install module.
+    -load-zip <zipfile>              Install module from zip file.
+    -check-upgrade                   Check and upgrade all modules.
+"""
+    )
+
+
+CmdArg.Bind("-help", showHelp)
 
 CmdArg.OnError("Invalid command.")
 CmdArg.Execute()
