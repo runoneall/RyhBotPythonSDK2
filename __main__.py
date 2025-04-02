@@ -358,7 +358,7 @@ def installModule(value):
             os.path.join(targetPath, targetModuleName),
             os.path.join(targetPath, "m_" + targetModuleName),
         )
-    targetModuleName = "m_" + targetModuleName
+        targetModuleName = "m_" + targetModuleName
     if os.path.exists(os.path.join(sdkModulePath, targetModuleName)) or os.path.exists(
         os.path.join(sdkModulePath, "d" + targetModuleName)
     ):
@@ -425,7 +425,7 @@ def loadModuleZip(value):
             os.path.join(targetPath, targetModuleName),
             os.path.join(targetPath, "m_" + targetModuleName),
         )
-    targetModuleName = "m_" + targetModuleName
+        targetModuleName = "m_" + targetModuleName
     if os.path.exists(os.path.join(sdkModulePath, targetModuleName)) or os.path.exists(
         os.path.join(sdkModulePath, "d" + targetModuleName)
     ):
