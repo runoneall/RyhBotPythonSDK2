@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import shutil
+import zipfile
 import requests
 
 
@@ -532,6 +533,62 @@ def checkUpgrade(value):
 
 
 CmdArg.Bind("-check-upgrade", checkUpgrade)
+
+
+# For Persional Origin
+checkOriginDir = checkInstallDir
+
+
+def zip_directory(src_dir, dst_zip):
+    with zipfile.ZipFile(dst_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(src_dir):
+            if "__pycache__" in dirs:
+                dirs.remove("__pycache__")
+            for file in files:
+                if file.startswith("."):
+                    continue
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, src_dir)
+                zipf.write(file_path, arcname)
+
+
+def makeOrigin(value):
+    checkModuleFile()
+    targetPath = os.path.join(".", "origin-release")
+    checkOriginDir(targetPath)
+    if not os.path.exists(os.path.join(".", "origin-maker-config.json")):
+        with open(os.path.join(".", "origin-maker-config.json"), "w") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "name": input("Origin Name: "),
+                        "base": input("Origin Base URL: "),
+                    },
+                    indent=2,
+                )
+            )
+    with open(os.path.join(".", "origin-maker-config.json"), "r") as f:
+        origin_config = json.loads(f.read())
+    origin_modules = {}
+    sdkInstalledModules: list[str] = [
+        os.path.basename(x)
+        for x in os.listdir(sdkModulePath)
+        if os.path.isdir(os.path.join(sdkModulePath, x)) and x.startswith("m_")
+    ]
+    for module in sdkInstalledModules:
+        print(f"Add {module} to origin...")
+        moduleInfo: dict = __import__(module).moduleInfo
+        origin_module_body = moduleInfo.copy()
+        del origin_module_body["name"]
+        origin_module_body["path"] = f"/{module}.zip"
+        origin_modules[moduleInfo["name"]] = origin_module_body
+    print(f"Make map.json...")
+    origin_map = {**origin_config, **origin_modules}
+    with open(os.path.join(targetPath, "map.json"), "w") as f:
+        json.dump(origin_map, f, indent=2, ensure_ascii=False)
+
+
+CmdArg.Bind("-make-origin", makeOrigin)
 
 
 def showHelp(value):
