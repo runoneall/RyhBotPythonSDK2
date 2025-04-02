@@ -30,37 +30,3 @@ def topological_sort(elements, dependencies, error):
 def ExecAsync(async_func, *args, **kwargs):
     loop = asyncio.get_event_loop()
     loop.run_in_executor(executor, lambda: asyncio.run(async_func(*args, **kwargs)))
-
-
-class CmdArg:
-    def __init__(self):
-        self.cmdArgs: list[str] = sys.argv[1:]
-        self.bindArgs: list[str] = []
-        self.bindArgObjs: dict[str, object] = {}
-        self.error = ""
-        self.errorFlag = True
-
-    def Bind(self, argName: str, argObj: object):
-        self.bindArgs.append(argName)
-        self.bindArgObjs[argName] = argObj
-
-    def OnError(self, error):
-        self.error = error
-
-    def Execute(self):
-        for i in range(len(self.cmdArgs)):
-            arg = self.cmdArgs[i]
-            if arg not in self.bindArgs:
-                continue
-            if (
-                self.cmdArgs[i] == self.cmdArgs[-1]
-                or self.cmdArgs[i + 1] in self.bindArgs
-            ):
-                value = ""
-            else:
-                value = self.cmdArgs[i + 1]
-            self.bindArgObjs[arg](value)
-            self.errorFlag = False
-        if self.errorFlag:
-            print(self.error)
-            exit(1)
