@@ -539,16 +539,21 @@ CmdArg.Bind("-check-upgrade", checkUpgrade)
 checkOriginDir = checkInstallDir
 
 
-def zip_directory(src_dir, dst_zip):
+def zip_dir(src_dir, dst_zip):
+    base_dir = os.path.normpath(src_dir)
+    main_folder = os.path.basename(base_dir)
     with zipfile.ZipFile(dst_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(src_dir):
-            if "__pycache__" in dirs:
-                dirs.remove("__pycache__")
+        for root, dirs, files in os.walk(base_dir):
+            dirs[:] = [d for d in dirs if d != "__pycache__"]
+            files = [f for f in files if not f.startswith(".")]
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
             for file in files:
-                if file.startswith("."):
-                    continue
                 file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, src_dir)
+                parent_dir = os.path.dirname(base_dir)
+                arcname_rel = os.path.relpath(file_path, parent_dir)
+                arcname = os.path.join(
+                    main_folder, os.path.relpath(file_path, base_dir)
+                )
                 zipf.write(file_path, arcname)
 
 
@@ -582,10 +587,15 @@ def makeOrigin(value):
         del origin_module_body["name"]
         origin_module_body["path"] = f"/{module}.zip"
         origin_modules[moduleInfo["name"]] = origin_module_body
+        zip_dir(
+            os.path.join(sdkModulePath, module),
+            os.path.join(targetPath, f"{module}.zip"),
+        )
     print(f"Make map.json...")
     origin_map = {**origin_config, **origin_modules}
     with open(os.path.join(targetPath, "map.json"), "w") as f:
         json.dump(origin_map, f, indent=2, ensure_ascii=False)
+    print(f"Make origin release at {targetPath}.")
 
 
 CmdArg.Bind("-make-origin", makeOrigin)
@@ -606,6 +616,7 @@ SDK Frame CLI Usage:
     -update-origin                   Update origin list in module.json file.
     -list-origin                     List all origins in module.json file.
     -del-origin <origin>             Delete origin from module.json file.
+    -make-origin                     Make origin release.
 
   For Module:
     -list-module                     List all installed modules.
