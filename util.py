@@ -1,7 +1,6 @@
 from collections import defaultdict, deque
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-import sys
 
 executor = ThreadPoolExecutor()
 
