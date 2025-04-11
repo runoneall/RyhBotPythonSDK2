@@ -5,7 +5,7 @@ class Trigger:
         self.handles: dict[list[object]] = {"ALL": []}
 
     def AddHandle(self, handle, uid="ALL"):
-        self.logger.info(f"Add Handler {handle.__name__}")
+        self.logger.info(f"Add Handler {handle.__name__} With UID {uid}")
         if uid not in self.handles:
             self.handles[uid] = []
         self.handles[uid].append(handle)
