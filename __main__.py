@@ -98,7 +98,7 @@ def setEnv(value):
     v = value.split("=")[1]
     if ":" in v:
         v_type = v.split(":")[0]
-        v = v.split(":")[1]
+        v = ':'.join(v.split(":")[1:])
     else:
         v_type = "str"
 
