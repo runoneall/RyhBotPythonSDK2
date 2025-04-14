@@ -111,8 +111,13 @@ def setEnv(value):
             v = True
         else:
             v = False
-    else:
+    elif v_type == "float":
         v = float(v)
+    elif v_type == "json":
+        v = json.loads(v)
+    else:
+        print(f"Invalid type {v_type}")
+        exit(1)
     writeEnvFile({**getEnvFile(), **{k: v}})
 
 
@@ -607,7 +612,7 @@ def showHelp(value):
 SDK Frame CLI Usage:
 
   For Env:
-    -set-env <key> [<type>:]<value>  Set environment variable. <type> can be "str", "int", "float", "bool".
+    -set-env <key> [<type>:]<value>  Set environment variable. <type> can be "str", "int", "float", "bool", "json".
     -del-env <key>                   Delete environment variable.
     -list-env                        List all environment variables.
 
