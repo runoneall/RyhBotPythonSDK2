@@ -395,6 +395,8 @@ def installModule(value):
         )
         if input("Install? (y/n) ") == "y":
             for dep in targetModuleObj["dependencies"]:
+                if dep.startswith("m_"):
+                    dep = dep[2:]
                 installModule(dep)
     if (
         "optional_dependencies" in targetModuleObj
