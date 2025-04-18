@@ -5,7 +5,7 @@ class Trigger:
         self.handles: dict[list[object]] = {"ALL": []}
 
     def AddHandle(self, handle, mid="ALL"):
-        self.logger.info(f"Add Handler {handle.__name__} With mid {mid}")
+        self.logger.info(f"Add Handler {handle.__name__} With Menu {mid}")
         if mid not in self.handles:
             self.handles[mid] = []
         self.handles[mid].append(handle)
